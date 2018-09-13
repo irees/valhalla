@@ -2427,28 +2427,46 @@ int main(int argc, char** argv) {
     std::sort(onestoptests.begin(), onestoptests.end());
   }
 
-  // go get information about what transit tiles we should be fetching
-  auto transit_tiles = which_tiles(pt, feed);
-  // spawn threads to download all the tiles returning a list of
-  // tiles that ended up having dangling stop pairs
-  auto dangling_tiles = fetch(pt, transit_tiles);
-  curl_global_cleanup();
-
-  // figure out which transit tiles even exist
-  boost::filesystem::recursive_directory_iterator transit_file_itr(
-      pt.get<std::string>("mjolnir.transit_dir") + filesystem::path::preferred_separator +
-      std::to_string(TileHierarchy::levels().rbegin()->first));
-  boost::filesystem::recursive_directory_iterator end_file_itr;
-  std::unordered_set<GraphId> all_tiles;
-  for (; transit_file_itr != end_file_itr; ++transit_file_itr) {
-    if (boost::filesystem::is_regular(transit_file_itr->path()) &&
-        transit_file_itr->path().extension() == ".pbf") {
-      all_tiles.emplace(GraphTile::GetTileId(transit_file_itr->path().string()));
-    }
+  std::string mode = "all";
+  if (argc > 10) {
+    mode = std::string(argv[10]);
   }
 
-  // spawn threads to connect dangling stop pairs to adjacent tiles' stops
-  stitch(pt, all_tiles, dangling_tiles);
+  std::unordered_set<GraphId> all_tiles;
+  if (mode == "all" || mode == "fetch") {
+    // go get information about what transit tiles we should be fetching
+    auto transit_tiles = which_tiles(pt, feed);
+    // spawn threads to download all the tiles returning a list of
+    // tiles that ended up having dangling stop pairs
+    auto dangling_tiles = fetch(pt, transit_tiles);
+    curl_global_cleanup();
+
+    // figure out which transit tiles even exist
+    boost::filesystem::recursive_directory_iterator transit_file_itr(
+        pt.get<std::string>("mjolnir.transit_dir") + filesystem::path::preferred_separator +
+        std::to_string(TileHierarchy::levels().rbegin()->first));
+    boost::filesystem::recursive_directory_iterator end_file_itr;
+    for (; transit_file_itr != end_file_itr; ++transit_file_itr) {
+      if (boost::filesystem::is_regular(transit_file_itr->path()) &&
+          transit_file_itr->path().extension() == ".pbf") {
+        all_tiles.emplace(GraphTile::GetTileId(transit_file_itr->path().string()));
+      }
+    }
+    // spawn threads to connect dangling stop pairs to adjacent tiles' stops
+    stitch(pt, all_tiles, dangling_tiles);
+  } else {
+    // figure out which transit tiles even exist
+    boost::filesystem::recursive_directory_iterator transit_file_itr(
+        pt.get<std::string>("mjolnir.transit_dir") + filesystem::path_separator +
+        std::to_string(TileHierarchy::levels().rbegin()->first));
+    boost::filesystem::recursive_directory_iterator end_file_itr;
+    for (; transit_file_itr != end_file_itr; ++transit_file_itr) {
+      if (boost::filesystem::is_regular(transit_file_itr->path()) &&
+          transit_file_itr->path().extension() == ".pbf") {
+        all_tiles.emplace(GraphTile::GetTileId(transit_file_itr->path().string()));
+      }
+    }
+  }
 
   // update tile dir loc.  Don't want to overwrite the real transit tiles
   if (argc > 4) {
@@ -2456,8 +2474,11 @@ int main(int argc, char** argv) {
     pt.add("mjolnir.tile_dir", std::string(argv[4]));
   }
 
-  build(pt, all_tiles, onestoptests);
-  ValidateTransit::Validate(pt, all_tiles, onestoptests);
-
+  if (mode == "all" || mode == "build") {
+    build(pt, all_tiles, onestoptests);
+  }
+  if (mode == "all" || mode == "validate") {
+    ValidateTransit::Validate(pt, all_tiles, onestoptests);
+  }
   return 0;
 }
