@@ -99,22 +99,6 @@ struct builder_stats {
   }
 };
 
-#define set_no_null(T, pt, path, null_value, set)                                                    \
-  {                                                                                                  \
-    auto value = pt.get<T>(path, null_value);                                                        \
-    if (value != null_value)                                                                         \
-      set(value);                                                                                    \
-  }
-
-struct unique_transit_t {
-  std::mutex lock;
-  std::unordered_map<std::string, size_t> trips;
-  std::unordered_map<std::string, size_t> block_ids;
-  std::unordered_set<std::string> missing_routes;
-  std::unordered_map<std::string, size_t> lines;
-};
-
-
 void write_pbf(const Transit& tile, const boost::filesystem::path& transit_tile) {
   // check for empty stop pairs and routes.
   if (tile.stop_pairs_size() == 0 && tile.routes_size() == 0 && tile.shapes_size() == 0) {
@@ -163,22 +147,6 @@ Transit read_pbf(const std::string& file_name, std::mutex& lock) {
   }
   return transit;
 }
-
-struct dist_sort_t {
-  PointLL center;
-  Tiles<PointLL> grid;
-  dist_sort_t(const GraphId& center, const Tiles<PointLL>& grid) : grid(grid) {
-    this->center = grid.TileBounds(center.tileid()).Center();
-  }
-  bool operator()(const GraphId& a, const GraphId& b) const {
-    auto a_dist = center.Distance(grid.TileBounds(a.tileid()).Center());
-    auto b_dist = center.Distance(grid.TileBounds(b.tileid()).Center());
-    if (a_dist == b_dist) {
-      return a.tileid() < b.tileid();
-    }
-    return a_dist < b_dist;
-  }
-};
 
 // Get scheduled departures for a stop
 std::unordered_multimap<GraphId, Departure>
