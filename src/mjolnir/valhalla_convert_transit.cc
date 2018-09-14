@@ -1241,9 +1241,9 @@ void build(const ptree& pt,
 }
 
 int main(int argc, char** argv) {
-  if (argc < 1) {
+  if (argc < 2) {
     std::cerr << "Usage: " << std::string(argv[0])
-              << " valhalla_config [target_directory]"
+              << " valhalla_config [target_directory] [test_file]"
               << std::endl;
     std::cerr << "Sample: " << std::string(argv[0])
               << " conf/valhalla.json ./transit_tiles"
@@ -1254,17 +1254,17 @@ int main(int argc, char** argv) {
   // args and config file loading
   ptree pt;
   rapidjson::read_json(std::string(argv[1]), pt);
-  if (argc > 1) {
+  if (argc > 2) {
     pt.get_child("mjolnir").erase("transit_dir");
     pt.add("mjolnir.transit_dir", std::string(argv[2]));
   }
   std::string testfile;
   std::vector<OneStopTest> onestoptests;
-//   if (argc > 2) {
-//     testfile = std::string(argv[3]);
-//     onestoptests = ParseTestFile(testfile);
-//     std::sort(onestoptests.begin(), onestoptests.end());
-//   }
+  if (argc > 3) {
+    testfile = std::string(argv[3]);
+    onestoptests = ParseTestFile(testfile);
+    std::sort(onestoptests.begin(), onestoptests.end());
+  }
 
   // figure out which transit tiles even exist
   boost::filesystem::recursive_directory_iterator transit_file_itr(
@@ -1282,7 +1282,7 @@ int main(int argc, char** argv) {
   }
 
   // update tile dir loc.  Don't want to overwrite the real transit tiles
-  if (argc > 1) {
+  if (argc > 2) {
     pt.get_child("mjolnir").erase("tile_dir");
     pt.add("mjolnir.tile_dir", std::string(argv[2]));
   }
