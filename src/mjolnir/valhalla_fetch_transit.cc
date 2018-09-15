@@ -43,6 +43,16 @@ using namespace valhalla::midgard;
 using namespace valhalla::baldr;
 using namespace valhalla::mjolnir;
 
+std::string url_encode(const std::string& unencoded) {
+  char* encoded = curl_escape(unencoded.c_str(), static_cast<int>(unencoded.size()));
+  if (encoded == nullptr) {
+    throw std::runtime_error("url encoding failed");
+  }
+  std::string encoded_str(encoded);
+  curl_free(encoded);
+  return encoded_str;
+}
+
 struct logged_error_t : public std::runtime_error {
   logged_error_t(const std::string& msg) : std::runtime_error(msg) {
     LOG_ERROR(msg);
@@ -134,16 +144,6 @@ std::string url(const std::string& path, const ptree& pt) {
     url += "&api_key=" + *key;
   }
   return url;
-}
-
-std::string url_encode(const std::string& unencoded) {
-  char* encoded = curl_escape(unencoded.c_str(), static_cast<int>(unencoded.size()));
-  if (encoded == nullptr) {
-    throw std::runtime_error("url encoding failed");
-  }
-  std::string encoded_str(encoded);
-  curl_free(encoded);
-  return encoded_str;
 }
 
 // TODO: update this call to get only the tiles that have changed since last time
