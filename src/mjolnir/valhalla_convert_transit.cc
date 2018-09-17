@@ -1286,6 +1286,6 @@ int main(int argc, char** argv) {
 
   LOG_INFO("Building transit network.");
   build(pt, all_tiles, onestoptests);
-  // ValidateTransit::Validate(pt, all_tiles, onestoptests);
+  ValidateTransit::Validate(pt, all_tiles, onestoptests);
   return 0;
 }
