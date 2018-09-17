@@ -1,15 +1,14 @@
 #ifndef VALHALLA_MJOLNIR_TRANSITPBF_H
 #define VALHALLA_MJOLNIR_TRANSITPBF_H
 
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 #include <boost/filesystem/operations.hpp>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 
-#include <valhalla/proto/transit.pb.h>
 #include <valhalla/baldr/graphconstants.h>
 #include <valhalla/baldr/graphid.h>
 #include <valhalla/baldr/graphreader.h>
@@ -19,6 +18,7 @@
 #include <valhalla/midgard/encoded.h>
 #include <valhalla/midgard/logging.h>
 #include <valhalla/midgard/sequence.h>
+#include <valhalla/proto/transit.pb.h>
 
 using namespace valhalla::baldr;
 using namespace valhalla::midgard;

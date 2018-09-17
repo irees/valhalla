@@ -32,8 +32,8 @@
 #include "mjolnir/admin.h"
 #include "mjolnir/graphtilebuilder.h"
 #include "mjolnir/servicedays.h"
-#include "mjolnir/validatetransit.h"
 #include "mjolnir/transitpbf.h"
+#include "mjolnir/validatetransit.h"
 
 #include <valhalla/proto/transit.pb.h>
 
@@ -1240,10 +1240,8 @@ void build(const ptree& pt,
 int main(int argc, char** argv) {
   if (argc < 2) {
     std::cerr << "Usage: " << std::string(argv[0])
-              << " valhalla_config [target_directory] [test_file]"
-              << std::endl;
-    std::cerr << "Sample: " << std::string(argv[0])
-              << " conf/valhalla.json ./transit_tiles"
+              << " valhalla_config [target_directory] [test_file]" << std::endl;
+    std::cerr << "Sample: " << std::string(argv[0]) << " conf/valhalla.json ./transit_tiles"
               << std::endl;
     return 1;
   }
@@ -1273,7 +1271,7 @@ int main(int argc, char** argv) {
     if (boost::filesystem::is_regular(transit_file_itr->path()) &&
         transit_file_itr->path().extension() == ".pbf") {
 
-      LOG_INFO("tile: "+transit_file_itr->path().string());
+      LOG_INFO("tile: " + transit_file_itr->path().string());
       all_tiles.emplace(GraphTile::GetTileId(transit_file_itr->path().string()));
     }
   }

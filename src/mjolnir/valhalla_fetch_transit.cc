@@ -33,8 +33,8 @@
 #include "mjolnir/admin.h"
 #include "mjolnir/graphtilebuilder.h"
 #include "mjolnir/servicedays.h"
-#include "mjolnir/validatetransit.h"
 #include "mjolnir/transitpbf.h"
+#include "mjolnir/validatetransit.h"
 
 #include <valhalla/proto/transit.pb.h>
 
@@ -292,8 +292,7 @@ void get_stop_stations(Transit& tile,
                        const ptree& response,
                        const AABB2<PointLL>& filter,
                        bool tile_within_one_tz,
-                       const std::unordered_map<uint32_t, multi_polygon_type>& tz_polys
-                       ) {
+                       const std::unordered_map<uint32_t, multi_polygon_type>& tz_polys) {
 
   for (const auto& station_pt : response.get_child("stop_stations")) {
 
@@ -784,7 +783,7 @@ void fetch_tiles(const ptree& pt,
         tile_within_one_tz = true;
       }
     }
-  
+
     // all the nodes...stations, platforms, and egresses
     std::unordered_map<std::string, uint64_t> nodes;
     // just the platforms
@@ -800,7 +799,8 @@ void fetch_tiles(const ptree& pt,
       // grab some stuff
       response = curler(*request, "stop_stations");
       // copy stops in, keeping map of stopid to graphid
-      get_stop_stations(tile, nodes, platforms, current, response, filter, tile_within_one_tz, tz_polys);
+      get_stop_stations(tile, nodes, platforms, current, response, filter, tile_within_one_tz,
+                        tz_polys);
       // please sir may i have some more?
       request = response.get_optional<std::string>("meta.next");
 
@@ -960,7 +960,6 @@ std::list<GraphId> fetch(const ptree& pt,
   return dangling;
 }
 
-
 struct dist_sort_t {
   PointLL center;
   Tiles<PointLL> grid;
@@ -1105,13 +1104,14 @@ void stitch(const ptree& pt,
 
 int main(int argc, char** argv) {
   if (argc < 2) {
-    std::cerr << "Usage: " << std::string(argv[0])
-              << " valhalla_config transit_land_url per_page [target_directory] [bounding_box]"
-                 "[transit_land_api_key] [import_level] [feed_onestop_id] [import_level] [feed_onestop_id]"
-              << std::endl;
+    std::cerr
+        << "Usage: " << std::string(argv[0])
+        << " valhalla_config transit_land_url per_page [target_directory] [bounding_box]"
+           "[transit_land_api_key] [import_level] [feed_onestop_id] [import_level] [feed_onestop_id]"
+        << std::endl;
     std::cerr << "Sample: " << std::string(argv[0])
               << " conf/valhalla.json http://transit.land/ 1000 ./transit_tiles "
-                 "-122.469,37.502,-121.78,38.018 transitland-YOUR_KEY_SUFFIX 4 f-9q9-bart"   
+                 "-122.469,37.502,-121.78,38.018 transitland-YOUR_KEY_SUFFIX 4 f-9q9-bart"
               << std::endl;
     return 1;
   }
