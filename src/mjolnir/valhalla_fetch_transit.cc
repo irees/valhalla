@@ -1107,11 +1107,11 @@ int main(int argc, char** argv) {
   if (argc < 2) {
     std::cerr << "Usage: " << std::string(argv[0])
               << " valhalla_config transit_land_url per_page [target_directory] [bounding_box]"
-                 "[transit_land_api_key]"
+                 "[transit_land_api_key] [import_level] [feed_onestop_id] [import_level] [feed_onestop_id]"
               << std::endl;
     std::cerr << "Sample: " << std::string(argv[0])
               << " conf/valhalla.json http://transit.land/ 1000 ./transit_tiles "
-                 "-31.56,36.63,-6.18,42.16 transitland-YOUR_KEY_SUFFIX"
+                 "-122.469,37.502,-121.78,38.018 transitland-YOUR_KEY_SUFFIX 4 f-9q9-bart"   
               << std::endl;
     return 1;
   }
